@@ -2,6 +2,7 @@ import KeysTab from './KeysTab.jsx';
 import React from 'react';
 import {useLS} from './useLS.js';
 import {Empty,Card,Chip,Tick,PageLine,Tiles,Section,Chev,FirTick,NumTick,toggleNum,Thin,Pill} from './ui.jsx';
+import {NoteRow} from './CollectorNote.jsx';
 import {taskStatus} from './access.js';
 import {planHideout,stName,CURRENCY,curLevel} from './hideout.js';
 import {COLLECTOR_ITEMS,TRADER_TASKS,TRADERS} from './data.js';
@@ -105,6 +106,7 @@ function TaskCard({k,tg}){
 }
 
 export default function LootTab({cy,s,set,tg}){
+  const [ced,setCed]=React.useState(null);
   const scope='now'; // prestige items plus the tasks you can start right now
   const needCol=cy.tasks.includes('Collector');
   const [q,setQ]=React.useState('');
@@ -126,7 +128,7 @@ export default function LootTab({cy,s,set,tg}){
   const list=items.filter(kinds[flt]||kinds.all).filter(o=>showAll==='all'||short(o)).sort((a,b)=>((b.prestige>0)-(a.prestige>0))||a.n.localeCompare(b.n));
   const covered=pre.length-preShort.length,pctCovered=pre.length?covered/pre.length*100:100;
   const pillCls=on=>'rounded-full border px-3.5 py-1.5 text-sm font-medium transition '+(on?'bg-amber-500 border-amber-500 text-black':'border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:bg-white/5');
-  const Pl=({k,children,n})=><button onClick={()=>setTab(k)} aria-pressed={tab===k} className={pillCls(tab===k)}>{children}{n!==undefined&&<span className="opacity-80"> {n}</span>}</button>;
+  const Pl=({k,children,n})=><button onClick={()=>setTab(k)} aria-pressed={tab===k} className={pillCls(tab===k)}>{children}{n!==undefined&&<span className="opacity-90"> {n}</span>}</button>;
   const Fl=({k,children})=><Pill on={flt===k} aria-pressed={flt===k} onClick={()=>setFlt(k)}>{children}</Pill>;
   return <div className="grid gap-4">
     <PageLine>What to keep, hand in or go and find. Your stash counts are checked against what the plan still needs.</PageLine>
@@ -135,7 +137,7 @@ export default function LootTab({cy,s,set,tg}){
 
     <div className="flex flex-wrap items-center gap-2">
       <Pl k="list" n={preShort.length+taskShort.length}>Shopping list</Pl><Pl k="hand" n={tasks.length}>Hand-ins</Pl><Pl k="keys">Keys</Pl>{needCol&&<Pl k="collector" n={colDone+'/'+COLLECTOR_ITEMS.length}>Collector</Pl>}
-      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Should I keep it? Type an item name" aria-label="Should I keep it? Item name" className="flex-1 min-w-[12rem] max-sm:basis-full max-sm:order-last bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm"/>
+      <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search an item: should I keep it?" aria-label="Search an item: should I keep it?" className="flex-1 min-w-[12rem] max-sm:basis-full max-sm:order-last bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-1.5 text-sm"/>
     </div>
     {q.trim().length>=2&&<Verdict q={q} all={allItems} scope={scope} s={s} cy={cy}/>}
 
@@ -163,10 +165,10 @@ export default function LootTab({cy,s,set,tg}){
       <div className="flex flex-wrap items-baseline justify-between gap-2"><div className="text-sm text-zinc-400">Every Collector item must be handed in <FirTick/> found in raid. Tick each one when you have found it.</div><div className="text-sm text-zinc-400"><b className="text-zinc-100 stat-val">{colDone}</b>/{COLLECTOR_ITEMS.length} found</div></div>
       <Thin p={colDone/COLLECTOR_ITEMS.length*100} tone={colDone===COLLECTOR_ITEMS.length?'bg-green-500':'bg-amber-500'}/>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">{COLLECTOR_ITEMS.map(i=>{const on=!!s.c['ci:'+i.n];
-        return <label key={i.n} className={'flex items-center gap-2.5 rounded-lg border bg-black/20 px-2.5 py-2 cursor-pointer hover:bg-white/5 '+(on?'border-green-400/25':'border-zinc-800')}>
+        return <NoteRow key={i.n} name={i.n} s={s} set={set} ed={ced} setEd={setCed} indent="pl-9" outer={'rounded-lg border bg-black/20 hover:bg-white/5 '+(on?'border-green-400/25':'border-zinc-800')}><label className="flex items-center gap-2.5 px-2.5 py-2 cursor-pointer">
           <input type="checkbox" checked={on} onChange={()=>tg('ci:'+i.n)} className="accent-amber-500 size-4 shrink-0"/>
           <a href={wiki(i.n)} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} className={'text-sm font-medium hover:underline hover:text-amber-400 min-w-0 '+(on?'line-through opacity-50':'')}>{i.n}</a>
-          {i.f==='check'&&<Chip tone="warn" title="Only one source lists this item, so check it in game">check</Chip>}</label>})}</div>
+          {i.f==='check'&&<Chip tone="warn" title="Only one source lists this item, so check it in game">check</Chip>}</label></NoteRow>})}</div>
     </section>}
   </div>;
 }

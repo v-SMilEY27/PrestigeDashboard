@@ -88,7 +88,7 @@ export default function RaidTab({cy,s,set,tg,best=[]}){
     <Section title={`Tasks on ${cur}`} sub={tasks.length?'tick one off when you finish it':undefined}>
       {tasks.length===0?<Card><div className="text-sm text-zinc-300">No startable tasks on this map right now{locked?`: ${locked} are locked behind level, loyalty, karma or an earlier task`:''}. Try another map or update your stats on Overview.</div></Card>
         :<Card c="grid gap-1 !p-3">{tasks.map(k=><div key={k.t+k.x} className="flex items-start gap-3 rounded-lg px-2 py-1.5 hover:bg-white/5">
-          <input type="checkbox" checked={false} onChange={()=>mark(k.t,k.x)} aria-label={'Mark '+k.x+' done'} title="Mark done" className="accent-amber-500 mt-1 size-4 shrink-0"/>
+          <label className="cbx"><input type="checkbox" checked={false} onChange={()=>mark(k.t,k.x)} aria-label={'Mark '+k.x+' done'} title="Mark done" className="accent-amber-500 mt-1 size-4 shrink-0"/></label>
           <div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><a href={wiki(k.x)} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline hover:text-amber-400">{k.x}</a><Chip>{k.t}</Chip>{k.any&&<Chip tone="map">any map</Chip>}{ls.open.has(k.t+'|'+k.x)&&<InProgressChip/>}
             {k.rw[0]>0&&<Chip tone="xp">+{fmt(k.rw[0])} XP</Chip>}{keysFor(k.t,k.x).length>0&&<Chip tone={keyReady(s,k.t,k.x)?'ok':'warn'} title="Task key"><KeyIcon/>{keyReady(s,k.t,k.x)?'key held':'needs key'}</Chip>}{k.rw[1]>0&&<Chip tone="rep">+{k.rw[1].toFixed(2)}</Chip>}</div>
             {k.rows.length>0&&<div className="flex flex-wrap gap-1 mt-1">{k.rows.map((r,i)=>r[0]==='x'?<Chip key={i} tone="mute">{r[1]}× any of {r[3]} items{r[2]?<> <FirTick/></>:null}</Chip>

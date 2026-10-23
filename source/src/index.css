@@ -44,7 +44,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input[type=number]:fo
 .kc-band{position:relative;width:2.6rem;flex-shrink:0;display:grid;place-items:center;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,0) 40%,rgba(0,0,0,.2)),repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 3px),var(--b);box-shadow:inset 1px 0 0 rgba(255,255,255,.28),inset 0 0 14px rgba(0,0,0,.22)}
 .kc-band span{writing-mode:vertical-rl;transform:rotate(180deg);font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--bt);white-space:nowrap}
 .kc-p1{--b:#185390;--bt:#eaf3ff;--bp:#185390}
-.kc-p2{--b:#5f8d38;--bt:#eefbe9;--bp:#466e28}
+.kc-p2{--b:#547c31;--bt:#eefbe9;--bp:#3e6123}
 .kc-p3{--b:#d7b906;--bt:#2a2a00;--bp:#766a00}
 .kc-p4{--b:#671b8f;--bt:#f6ecff;--bp:#671b8f}
 .kc-p5{--b:#9a1c1f;--bt:#fff0ee;--bp:#9a1c1f}
@@ -154,7 +154,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input[type=number]:fo
 @media (prefers-reduced-motion:reduce){.kc-fill::after{animation:none}}
 
 /* Tab cards: dark plastic when idle, a white card (matt black for Prestige 6) with the prestige's coloured strip when open. */
-.kt-p1{--b:#185390}.kt-p2{--b:#5f8d38}.kt-p3{--b:#d7b906}.kt-p4{--b:#671b8f}.kt-p5{--b:#9a1c1f}.kt-p6{--b:#eab534}
+.kt-p1{--b:#185390}.kt-p2{--b:#547c31}.kt-p3{--b:#d7b906}.kt-p4{--b:#671b8f}.kt-p5{--b:#9a1c1f}.kt-p6{--b:#eab534}
 .kt{position:relative;overflow:hidden;border-radius:.7rem;padding:.45rem 1rem .6rem;font-size:.875rem;font-weight:500;color:#d4d4d8;background:linear-gradient(180deg,#1d1e22,#121316);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),inset 0 0 0 1px rgba(0,0,0,.55),0 2px 6px rgba(0,0,0,.45);transition:filter .15s,color .15s}
 .kt::after{content:'';position:absolute;left:0;right:0;bottom:0;height:.22rem;background:var(--b);opacity:.28;transition:opacity .15s}
 .kt:hover:not(:disabled){filter:brightness(1.25);color:#fff}
@@ -175,7 +175,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input[type=number]:fo
 /* Accent colour follows the open prestige. Everything that was amber 500 (headings, open pills, ticks, borders, bars) takes the prestige's light tone. Warnings stay amber, and the header buttons keep their own colours. */
 :root{--amb5:oklch(76.9% .188 70.08)}
 .acc{--acc:var(--amb5)}
-.acc-p1{--acc:#3e8edc}.acc-p2{--acc:#89c15b}.acc-p3{--acc:#eed61a}.acc-p4{--acc:#b565e2}.acc-p5{--acc:#ef3034}.acc-p6{--acc:#eab534}
+.acc-p1{--acc:#3e8edc}.acc-p2{--acc:#79aa50}.acc-p3{--acc:#eed61a}.acc-p4{--acc:#b565e2}.acc-p5{--acc:#ef3034}.acc-p6{--acc:#eab534}
 .acc{--color-amber-500:var(--acc)}
 .acc header{--acc:var(--amb5);--color-amber-500:var(--amb5)}
 
@@ -194,7 +194,8 @@ button:focus-visible,a:focus-visible,summary:focus-visible,input[type=number]:fo
 .md-head,.md-foot{border-color:color-mix(in srgb,var(--mc) 22%,transparent)}
 .md-title{color:var(--mc)}
 .md-x:hover{color:var(--mc);border-color:color-mix(in srgb,var(--mc) 60%,transparent)}
-.md-link{color:#a1a1aa;text-decoration:underline;text-underline-offset:2px}
+.md-link{color:#a1a1aa;text-decoration:none;border-radius:.375rem;padding:.05rem .4rem;margin-inline:-.4rem;background:color-mix(in srgb,currentColor 14%,transparent);transition:background-color .15s,color .15s}
+.md-link:hover{background:color-mix(in srgb,currentColor 26%,transparent)}
 .md-link:hover{color:var(--mc)}
 .md-drop{transition:border-color .15s,box-shadow .15s,background-color .15s}
 .md-drop.on{border-color:#38bdf8;background:rgba(56,189,248,.08);box-shadow:0 0 0 1px #38bdf8,0 0 22px rgba(56,189,248,.35)}
@@ -271,7 +272,8 @@ h3.text-lg.font-bold,h2.text-xl.font-bold,h2.text-2xl.font-bold,.md-title{font-f
 .md-panel :is(button,a,summary,input,select,textarea):focus-visible{outline-color:var(--mc)}
 
 /* One link style for text-like actions on the pages: underlined, soft grey, accent on hover. lnk-acc keeps the page accent colour. */
-.lnk{text-decoration:underline;text-underline-offset:2px;color:#a1a1aa;cursor:pointer}
+.lnk{text-decoration:none;border-radius:.375rem;padding:.05rem .4rem;margin-inline:-.4rem;background:color-mix(in srgb,currentColor 14%,transparent);color:#a1a1aa;cursor:pointer;transition:background-color .15s,color .15s}
+.lnk:hover{background:color-mix(in srgb,currentColor 26%,transparent)}
 .lnk:hover{color:var(--acc,#fbbf24)}
 .lnk-acc{color:var(--acc,#fbbf24)}
 
@@ -298,6 +300,20 @@ h3.text-lg.font-bold,h2.text-xl.font-bold,h2.text-2xl.font-bold,.md-title{font-f
 .cl-cursor::after{content:'_';margin-left:.1em;animation:clblink 1.1s steps(1) infinite}
 @keyframes clblink{0%,55%{opacity:1}56%,100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){.cl-cursor::after{animation:none}}
+/* Brief outline when a task name on the Overview jumps to its section. */
+@keyframes jflash{0%{box-shadow:0 0 0 2px var(--acc,#f59e0b),0 0 14px var(--acc,#f59e0b)}100%{box-shadow:0 0 0 2px transparent,0 0 0 transparent}}
+.jump-flash{animation:jflash 1.4s ease-out}
+@media (prefers-reduced-motion:reduce){.jump-flash{animation:none}}
+
+/* 1.23 tap targets. A checkbox in its own label gets a bigger hit area without moving anything. */
+.cbx{display:grid;place-items:center;flex-shrink:0;margin:-.5rem;padding:.5rem;cursor:pointer}
+/* Phones: small text buttons and links get a 24px tall hit area, and the window close button keeps its width. */
+@media (max-width:639px){
+  .lnk,.md-link{padding-block:.25rem;margin-block:-.25rem}
+  a.truncate{padding-block:.2rem}
+  label.cursor-pointer.text-xs{min-height:1.5rem;align-items:center}
+  .md-x{min-width:2rem;flex-shrink:0}
+}
 
 /* The page scrollbar: thin and dark, a little brighter while the pointer is over the page. Windows and the phone tab strip keep theirs hidden. */
 html{scrollbar-width:thin;scrollbar-color:#3f3f46 transparent}
@@ -306,3 +322,27 @@ html:hover{scrollbar-color:#71717a transparent}
 .pg-fade{position:fixed;left:0;right:0;bottom:0;height:2.5rem;z-index:10;pointer-events:none;background:linear-gradient(transparent,#0e0f11);opacity:0;transition:opacity .2s}
 .pg-fade[data-on]{opacity:1}
 @media (prefers-reduced-motion:reduce){.pg-fade{transition:none}}
+
+/* The shield in Backup, Transfer & Restore draws itself once when the browser agrees to protect the progress. */
+.sh-draw,.sh-tick{stroke-dasharray:100;stroke-dashoffset:100;animation:shdraw .7s ease-out forwards}
+.sh-tick{animation-duration:.4s;animation-delay:.55s}
+@keyframes shdraw{to{stroke-dashoffset:0}}
+.sh-pop{animation:shpop .9s ease-out}
+@keyframes shpop{0%{transform:scale(.85)}55%{transform:scale(1.1);filter:drop-shadow(0 0 7px rgba(74,222,128,.75))}100%{transform:scale(1);filter:drop-shadow(0 0 0 transparent)}}
+@media (prefers-reduced-motion:reduce){.sh-draw,.sh-tick{animation:none;stroke-dashoffset:0}.sh-pop{animation:none}}
+/* Rewards window: a window colour per prestige, and the small Rewards button on the prestige cards */
+.md-p1{--mc:#3e8edc}.md-p2{--mc:#79aa50}.md-p3{--mc:#eed61a}.md-p4{--mc:#b565e2}.md-p5{--mc:#ef3034}.md-p6{--mc:#eab534}
+.kc-rw{display:inline-flex;align-items:center;gap:.35rem;border-radius:.5rem;border:1px solid color-mix(in srgb,var(--bp,#999) 55%,transparent);background:rgba(255,255,255,.35);color:var(--bp,#333);padding:.15rem .55rem;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;line-height:1.3;white-space:nowrap;transition:background .15s,border-color .15s}
+.kc-rw:hover{background:rgba(255,255,255,.7);border-color:var(--bp,#999)}
+.kc-p6 .kc-rw{--bp:#f0c24a;background:rgba(240,194,74,.1)}.kc-p6 .kc-rw:hover{background:rgba(240,194,74,.22)}
+.kc-idle .kc-rw{--bp:#8a8f98;background:rgba(0,0,0,.06)}
+.kc-rw-i{padding:.3rem}
+/* Collector item notes: the pencil button takes the prestige colour (--acc) once an item has a note. */
+.cn-btn{display:grid;place-items:center;flex-shrink:0;width:1.75rem;height:1.75rem;border-radius:.375rem;border:1px solid #3f3f46;color:#71717a;transition:color .15s,background-color .15s,border-color .15s}
+.cn-btn:hover{color:#e4e4e7;border-color:#71717a}
+.cn-btn.cn-on{color:var(--acc,#fbbf24);border-color:color-mix(in srgb,var(--acc,#fbbf24) 60%,transparent);background:color-mix(in srgb,var(--acc,#fbbf24) 12%,transparent)}
+.cn-btn.cn-on:hover{background:color-mix(in srgb,var(--acc,#fbbf24) 22%,transparent);border-color:var(--acc,#fbbf24)}
+.cn-in:focus{border-color:var(--acc,#fbbf24)}
+.cn-filter{border:1px solid #3f3f46;border-radius:.5rem;padding:.35rem .7rem;font-size:.8125rem;font-weight:600;color:#a1a1aa;white-space:nowrap;transition:color .15s,background-color .15s,border-color .15s}
+.cn-filter:hover{color:#e4e4e7;border-color:#71717a}
+.cn-filter[aria-pressed=true]{color:var(--acc,#fbbf24);border-color:color-mix(in srgb,var(--acc,#fbbf24) 60%,transparent);background:color-mix(in srgb,var(--acc,#fbbf24) 14%,transparent)}

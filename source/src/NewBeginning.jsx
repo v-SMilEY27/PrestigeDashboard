@@ -20,8 +20,9 @@ export function NbObj({o,s,set,tg}){
 
 export default function NewBeginning({cy,s,set,tg}){
   const [open,setOpen]=useLS('tpp2_ui_nb_open',false);
+  React.useEffect(()=>{const h=e=>{if(e.detail==='sec-nb')setOpen(true)};window.addEventListener('pd-jump',h);return()=>window.removeEventListener('pd-jump',h)},[setOpen]);
   const tpl=NB_TEMPLATE[cy.p],list=nbList(cy,s),done=list.filter(o=>o.done).length,all=list.length>0&&done===list.length;
-  return <section className="grid gap-2"><Pop done={all} className="rounded-xl">
+  return <section id="sec-nb" className="grid gap-2 scroll-mt-24 rounded-xl"><Pop done={all} className="rounded-xl">
     <Card c="!p-0">
       <button onClick={()=>setOpen(o=>!o)} aria-expanded={open} className="w-full text-left p-3">
         <div className="flex items-center justify-between gap-2"><span className="font-semibold flex items-center gap-2"><span className={'text-zinc-500 text-xs inline-block transition-transform '+(open?'rotate-90':'')}><Chev/></span>New Beginning objectives</span>

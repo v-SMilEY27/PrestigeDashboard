@@ -1,9 +1,11 @@
 import React from 'react';
 import {Section,Card,Stat,Chip,Tick,Thin,Done,Pin} from './ui.jsx';
 import {TRADER_LL4,TRADERS,CQUESTS,COLLECTOR_ITEMS,cqKey} from './data.js';
+import {NoteRow} from './CollectorNote.jsx';
 const pc=(x,y)=>y?Math.round(x/y*100):0;
 
-export default function CollectorSection({s,tg}){
+export default function CollectorSection({s,tg,set}){
+  const [ed,setEd]=React.useState(null);
   const ll4=TRADERS.filter(t=>(s.n['ll:'+t]||1)>=4).length;
   const firDone=COLLECTOR_ITEMS.filter(i=>s.c['ci:'+i.n]).length;
   return <div className="grid gap-4">
@@ -21,7 +23,7 @@ export default function CollectorSection({s,tg}){
   </Section>
   <Section title="Found-in-raid items" sub={`${firDone} of ${COLLECTOR_ITEMS.length}`}>
     <Card><Thin p={pc(firDone,COLLECTOR_ITEMS.length)} tone={firDone===COLLECTOR_ITEMS.length?'bg-green-500':'bg-amber-500'}/>
-      <div className="grid sm:grid-cols-2 gap-x-3 mt-3">{COLLECTOR_ITEMS.map(i=><Tick key={i.n} on={s.c['ci:'+i.n]} fn={()=>tg('ci:'+i.n)} chips={i.f==='check'?<Chip tone="warn" title="Not in every current source">check</Chip>:null}>{i.n}</Tick>)}</div>
+      <div className="grid sm:grid-cols-2 gap-x-3 mt-3">{COLLECTOR_ITEMS.map(i=><NoteRow key={i.n} name={i.n} s={s} set={set} ed={ed} setEd={setEd}><Tick on={s.c['ci:'+i.n]} fn={()=>tg('ci:'+i.n)} chips={i.f==='check'?<Chip tone="warn" title="Not in every current source">check</Chip>:null}>{i.n}</Tick></NoteRow>)}</div>
       <div className="text-xs text-zinc-500 mt-3">Only items found in raid count. The list has {COLLECTOR_ITEMS.length} items.</div></Card>
   </Section>
   </div>}

@@ -1,4 +1,5 @@
 import '@fontsource/oxanium/latin-700.css';
+import {openRewards} from './rewardsBus.js';
 import React from 'react';
 
 export const Card=({children,c=''})=><div className={'rounded-xl border border-zinc-800 bg-zinc-900 p-4 '+c}>{children}</div>;
@@ -26,7 +27,7 @@ export const Pop=({done,className='',children})=>{
   return <div className={className+(on?' done-flash':'')}>{children}</div>};
 const tones={ok:'border-green-400/30 bg-green-400/10 text-green-300',bad:'border-red-400/40 bg-red-400/10 text-red-300',mute:'border-zinc-700 bg-zinc-800/60 text-zinc-300',xp:'border-zinc-700 bg-zinc-800/60 text-zinc-300',rep:'border-zinc-700 bg-zinc-800/60 text-zinc-300',map:'border-zinc-700 bg-zinc-800/60 text-zinc-300',warn:'border-amber-400/40 bg-amber-400/10 text-amber-400',quiet:'border-transparent bg-transparent text-zinc-400 !px-1'};
 export const Chip=({tone='mute',title,children})=><span title={title} className={'inline-flex items-center rounded-full border px-2 py-0.5 text-xs leading-4 max-w-full whitespace-normal '+tones[tone]}>{children}</span>;
-// The green bold used whenever a message names the Backup & Restore button or its Restore choice. Use this everywhere so they always match the button.
+// The green bold used whenever a message names the Backup, Transfer & Restore button or its Restore choice. Use this everywhere so they always match the button.
 export const Bk=({children})=><b className="text-green-400">{children}</b>;
 export const Tick=({on,fn,children,chips,note,disabled})=><label className="flex items-start gap-3 rounded-lg px-2 py-1.5 cursor-pointer transition hover:bg-white/5">
   <input type="checkbox" checked={!!on} onChange={fn} disabled={disabled} className="accent-amber-500 mt-1 size-4 shrink-0"/>
@@ -95,18 +96,19 @@ export const PrestigeCard=({p,pct,done,total,name,faction,compact})=>{
   // Completing the last requirement while you watch stamps the card ACCESS GRANTED for a few seconds. Opening an already complete prestige does not.
   const prev=React.useRef(pct),[stamp,setStamp]=React.useState(false);
   React.useEffect(()=>{const was=prev.current;prev.current=pct;if(was<100&&pct>=100){setStamp(true);const t=setTimeout(()=>setStamp(false),3200);return()=>clearTimeout(t)}if(pct<100)setStamp(false)},[pct]);
-  return <div className={'kc '+(ready?'kc-done':'kc-prog')+(stamp?' kc-flash':'')+' kc-p'+p+' border relative flex flex-col overflow-hidden '+(compact?'min-h-[4.5rem]':'min-h-[8.5rem]')} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Prestige readiness">
+  return <div className={'kc '+(ready?'kc-done':'kc-prog')+(stamp?' kc-flash':'')+' kc-p'+p+' border relative flex flex-col overflow-hidden '+(compact?'min-h-[4.5rem]':'min-h-[8.5rem]')} >
+    <span role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Prestige readiness" className="sr-only">{pct}%</span>
     <div className="relative z-[1] flex flex-1 items-stretch">
       <div className={'flex-1 min-w-0 pl-4 pr-3 flex items-center gap-3.5 '+(compact?'py-2':'py-4')}>
         <span className="kc-slot" aria-hidden="true"/>
         <div className="min-w-0 flex flex-col justify-center gap-1">
           {!compact&&<span className="kc-eyebrow leading-none">{ready?"Ready to prestige":"Working toward"}</span>}
-          <span className={'kc-title font-bold uppercase tracking-wider whitespace-nowrap '+(compact?'text-base':'text-xl')}>{playName(p)}</span>
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1"><span className={'kc-title font-bold uppercase tracking-wider whitespace-nowrap '+(compact?'text-base':'text-xl')}>{playName(p)}</span><button type="button" onClick={()=>openRewards(p,p)} title={'See what '+playName(p)+' gives you'} className="kc-rw"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2.2" y="6.2" width="11.6" height="7.6" rx="1"/><path d="M1.6 4.4h12.8v1.8H1.6zM8 4.4v9.4M8 4.4C6.2 4.4 4.8 3.7 5.2 2.8S7.5 2.7 8 4.4zM8 4.4c1.8 0 3.2-.7 2.8-1.6S8.5 2.7 8 4.4z"/></svg>Rewards</button></span>
           {!compact&&<span className="mt-0.5"><PlayerChip name={name} faction={faction}/></span>}</div>
         <div className="ml-auto flex items-center gap-3.5">
           <span className={'patch-font kc-pct leading-none tabular-nums '+(compact?'text-2xl':'text-4xl sm:text-5xl')}>{shownPct}%</span>
           {ready?<span className="kc-stat hidden sm:flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] leading-snug"><span className="kc-led" aria-hidden="true"/>Access<br/>granted</span>
-            :<span className="kc-stat hidden sm:block text-xs font-semibold uppercase tracking-[0.14em] leading-snug">{done}<span className="opacity-70"> of {total}</span><br/>met</span>}</div></div>
+            :<span className="kc-stat hidden sm:block text-xs font-semibold uppercase tracking-[0.14em] leading-snug">{done}<span className="opacity-85"> of {total}</span><br/>met</span>}</div></div>
       <span className="kc-band" aria-hidden="true"><span>{p===6?'Final':ready?'Ready':'Active'}</span></span></div>
     <span className="sr-only" role="status">{stamp?playName(p)+' complete. Access granted.':''}</span>
     {stamp&&<div aria-hidden="true" className="kc-stamp"><span><i className="kc-led"/>Access granted</span></div>}
@@ -142,6 +144,7 @@ export const Modal=({label,title,tone='green',onClose,dismiss,wide='max-w-lg',z=
 export const ModalFoot=({left,children})=><div className="md-foot sticky bottom-0 z-10 -mx-5 -mb-5 mt-1 flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3 bg-[#0f1012]/95 backdrop-blur"><div className="text-xs">{left}</div><div className="flex flex-wrap items-center gap-2">{children}</div></div>;
 // The Close button every window ends with, in the window's own colour. quiet = outlined, used when another button is the main action.
 const CB={amber:['bg-amber-500 hover:bg-amber-400','border-amber-500/50 text-amber-300 hover:bg-amber-500/10'],sky:['bg-sky-500 hover:bg-sky-400','border-sky-500/50 text-sky-300 hover:bg-sky-500/10'],green:['bg-green-500 hover:bg-green-400','border-green-500/50 text-green-300 hover:bg-green-500/10'],pink:['bg-pink-500 hover:bg-pink-400','border-pink-500/50 text-pink-300 hover:bg-pink-500/10']};
+['p1','p2','p3','p4','p5','p6'].forEach(k=>{CB[k]=['bg-[var(--mc)] hover:brightness-110','border-[color:color-mix(in_srgb,var(--mc)_55%,transparent)] text-[var(--mc)] hover:bg-white/5']});
 export const CloseBtn=({tone='amber',quiet,onClick,autoFocus})=><button autoFocus={autoFocus} onClick={onClick} className={'rounded-lg text-sm px-5 py-2 '+(quiet?'border font-normal '+CB[tone][1]:'text-black font-semibold '+CB[tone][0])}>Close</button>;
 
 // A tick for a number that has a target (level, roubles, skills, item counts). Ticking sets the number to the target and remembers

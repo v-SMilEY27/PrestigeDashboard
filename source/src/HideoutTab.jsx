@@ -59,7 +59,7 @@ export default function HideoutTab({cy,s,set,sec:tab,setSec:setTab,open,setOpen}
       <Stat label="Roubles" value={fmt(allMats.find(m=>m.n==='Roubles')?.need||0)} sub="for all upgrades"/>
     </div>
 
-    <div className="flex flex-wrap gap-2">{[['plan','Plan',steps.length+' upgrades'],['mats','Materials',leftCount+' short'],['mine','My hideout','set built levels']].map(([k,l,n])=><Pill key={k} on={tab===k} onClick={()=>setTab(k)}>{l} <span className="opacity-80 text-xs">· {n}</span></Pill>)}</div>
+    <div className="flex flex-wrap gap-2">{[['plan','Plan',steps.length+' upgrades'],['mats','Materials',leftCount+' short'],['mine','My hideout','set built levels']].map(([k,l,n])=><Pill key={k} on={tab===k} onClick={()=>setTab(k)}>{l} <span className="opacity-90 text-xs">· {n}</span></Pill>)}</div>
 
     {tab==='mine'&&<details open className="group">
       <summary className="cursor-pointer list-none flex items-baseline gap-2 mb-2"><h3 className="text-lg font-bold text-amber-500">My hideout</h3><span className="text-xs text-zinc-500">set the level you have built, and optionally plan extra modules</span></summary>

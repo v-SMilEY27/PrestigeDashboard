@@ -1,3 +1,4 @@
+import {openRewards} from './rewardsBus.js';
 import React from 'react';
 import {playName} from './ui.jsx';
 import {CYCLES} from './data.js';
@@ -50,12 +51,13 @@ export default function Picker({pick,onBack,current,onResetCurrent}){
             <span className="ml-auto flex items-center gap-2.5 shrink-0">
               {st==='prog'?<><span className="patch-font text-2xl sm:text-4xl leading-none tabular-nums kc-pct" aria-label={i.pct+' percent complete'}>{i.pct}%</span></>
                 :<><span className="kc-led" aria-hidden="true"/><span className="kc-stat hidden sm:inline text-[11px] font-bold uppercase tracking-[0.18em]">{st==='done'?'Access granted':'Not started'}</span></>}</span></button>
+          <button type="button" onClick={()=>openRewards(c.p,cur)} title={'See what Prestige '+c.p+' gives you'} className="kc-rw kc-rw-i self-center shrink-0 mr-1.5"><svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2.2" y="6.2" width="11.6" height="7.6" rx="1"/><path d="M1.6 4.4h12.8v1.8H1.6zM8 4.4v9.4M8 4.4C6.2 4.4 4.8 3.7 5.2 2.8S7.5 2.7 8 4.4zM8 4.4c1.8 0 3.2-.7 2.8-1.6S8.5 2.7 8 4.4z"/></svg><span className="sr-only">Rewards</span></button>
           {i&&<button onClick={()=>setAsk(ask===c.p?null:c.p)} aria-expanded={ask===c.p} title={'Reset Prestige '+c.p} className="mr-3 self-center shrink-0 rounded-md px-1.5 py-1 text-[11px] uppercase tracking-widest text-zinc-500 transition hover:text-red-300 hover:bg-white/5">Reset</button>}
           <span className="kc-band" aria-hidden="true"><span>{fin?'Final':st==='done'?'Done':st==='prog'?'Active':'Pending'}</span></span></div>
         {st==='prog'&&<div aria-hidden="true" className="kc-rail absolute inset-x-0 bottom-0 h-1.5">{i.pct>0&&<span className="kc-fill" style={{width:Math.min(100,i.pct)+'%'}}/>}</div>}
       </div>})}</div>
     {ask&&<div role="alert" className="rounded-xl border border-red-400/40 bg-red-400/10 px-4 py-3 grid gap-2 text-sm">
-          <div className="text-red-300"><b>Reset Prestige {ask}?</b> This erases its setup, ticked tasks, hideout levels, stash counts and change log. Your other prestiges are not touched. A safety copy is saved first, and you can bring it back from Backup &amp; Restore.</div>
+          <div className="text-red-300"><b>Reset Prestige {ask}?</b> This erases its setup, ticked tasks, hideout levels, stash counts and change log. Your other prestiges are not touched. A safety copy is saved first, and you can bring it back from Backup, Transfer &amp; Restore.</div>
           <div className="flex gap-2"><button disabled={busy} onClick={()=>doReset(ask)} className="rounded-lg bg-red-500 text-white font-semibold px-3 py-1.5 text-sm hover:bg-red-400 disabled:opacity-50">Yes, reset it</button>
             <button onClick={()=>setAsk(null)} className="rounded-lg border border-zinc-600 px-3 py-1.5 text-sm text-zinc-300 hover:bg-white/5">Cancel</button></div></div>}
     <div className="rounded-xl border border-zinc-700 bg-zinc-900 p-4 grid gap-2">

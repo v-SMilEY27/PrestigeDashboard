@@ -53,7 +53,7 @@ export default function History({cy,s,log,undo,clear}){
     <Strip log={log}/>
     <Section title="Change history" sub="newest first"><Card c="!p-3 grid gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        {['All',...CATS.filter(c=>counts[c])].map(c=><Pill key={c} on={cat===c} aria-pressed={cat===c} onClick={()=>setCat(c)}>{c}{c!=='All'&&<span className="opacity-80"> {counts[c]}</span>}</Pill>)}
+        {['All',...CATS.filter(c=>counts[c])].map(c=><Pill key={c} on={cat===c} aria-pressed={cat===c} onClick={()=>setCat(c)}>{c}{c!=='All'&&<span className="opacity-90"> {counts[c]}</span>}</Pill>)}
         <input value={q} onChange={e=>setQ(e.target.value)} placeholder="Search your history" aria-label="Search your history" className="ml-auto w-full sm:w-56 rounded-lg border border-zinc-700 bg-black/30 px-3 py-1.5 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-amber-500 outline-none"/></div>
       {log.length===0?<Empty title="Nothing here yet" hint="Changes you make after setup, such as ticks, levels and imports, appear here as you make them."/>
         :shown.length===0?<Empty icon="search" title="No changes match" hint="Try another filter or clear the search box."/>

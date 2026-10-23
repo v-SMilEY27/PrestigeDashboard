@@ -2,6 +2,7 @@ import React from 'react';
 import {useLS} from './useLS.js';
 import {PageLine,Chev,Pin,CheckGlyph,Thin,Led,Pop,ledOf,Empty,Tiles,ExpandAll,Chip as SharedChip} from './ui.jsx';
 import {taskStatus} from './access.js';
+import {useLogStatus,fmtAt} from './LogStatus.jsx';
 import CollectorSection from './CollectorSection.jsx';
 import {PREREQ,TASK_REWARD,TASK_MAP,TASK_LL,TASK_REQ,TRADER_TASKS,TRADERS} from './data.js';
 
@@ -20,8 +21,8 @@ return {chains,singles:l.filter(x=>!par[x].length&&!kids[x].length)}};
 // Reward and map details in task rows are shown quietly (no pill); everything else uses the shared chip.
 const Chip=({tone,title,children})=><SharedChip tone={['xp','rep','map'].includes(tone)?'quiet':tone} title={title}>{children}</SharedChip>;
 
-const Row=({t,x,s,tg,next,note,warn,grp}) => {
-  const on=!!s.c['tk:'+t+':'+x],r=TASK_REQ[t+'|'+x],rw=TASK_REWARD[t+'|'+x],mp=TASK_MAP[t+'|'+x];
+const Row=({t,x,s,tg,next,note,warn,grp,fin}) => {
+  const on=!!s.c['tk:'+t+':'+x],at=on&&fin?fin[t+'|'+x]:0,r=TASK_REQ[t+'|'+x],rw=TASK_REWARD[t+'|'+x],mp=TASK_MAP[t+'|'+x];
   const lv=r?r[0]:0,lls=r&&r[1]?r[1].split(','):[];
   const eff=TASK_LL[t+'|'+x]||1,own=lls.some(e=>e.startsWith(t));
   const ext=(PREREQ[t+'|'+x]||[]).map(p=>{const i=p.indexOf('|');return [p.slice(0,i),p.slice(i+1)]}).filter(([pt])=>pt!==t);
@@ -43,6 +44,7 @@ const Row=({t,x,s,tg,next,note,warn,grp}) => {
           {next&&!on&&<span className="text-xs font-bold tracking-wide rounded bg-green-500 text-green-950 px-1.5 py-0.5">NEXT</span>}
           {chips.length>0&&<div className={'flex flex-wrap items-center gap-1 min-w-0 max-w-full sm:ml-auto sm:justify-end max-sm:basis-full '+(on?'opacity-50':'')}>{chips}</div>}
         </div>
+        {at>0&&<div className="text-xs text-pink-300 mt-1">Finished {fmtAt(at)} <span className="text-pink-300/60">· from your game logs</span></div>}
         {note&&<div className="text-xs text-zinc-400 mt-1">after: {note}</div>}
         {warn&&<div className="text-xs text-amber-400/80 mt-1">{warn}</div>}
         {ext.length>0&&<div className="text-xs text-amber-400/80 mt-1">Also needs: {ext.map(([pt,pn])=>pn+(pt==='Other'?' (other trader)':' ('+pt+')')).join(', ')}</div>}
@@ -54,6 +56,7 @@ const Row=({t,x,s,tg,next,note,warn,grp}) => {
 const Stat=({label,value,sub})=><div className="rounded-lg border border-zinc-800 bg-black/20 px-3 py-2"><div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">{label}</div><div className="text-lg font-bold leading-6">{value}</div>{sub&&<div className="text-xs text-zinc-500">{sub}</div>}</div>;
 
 export default function TradersTab({open,setOpen,s,set,tg,sel,setSel,hide,setHide,view:view0,setView,mapf,setMapf,needCol,go}){
+  const ls=useLogStatus(s);
   const view=(view0==='collector'&&!needCol)?'trader':view0;
   const all=Object.entries(TRADER_TASKS);
   const done=(t,x)=>!!s.c['tk:'+t+':'+x];
@@ -123,10 +126,10 @@ export default function TradersTab({open,setOpen,s,set,tg,sel,setSel,hide,setHid
       {hits.length===0&&<Empty icon="search" title="No tasks match" hint="Check the spelling or try part of the name."/>}
       {names.filter(t=>byT[t]).map(t=><div key={t} className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
         <div className="flex items-center justify-between mb-1"><button onClick={()=>{setSel(t);setView('trader');setQ('')}} title="Open this trader" className="font-semibold hover:text-amber-400">{t}</button><span className="text-xs text-zinc-400">{byT[t].filter(x=>done(t,x)).length}/{byT[t].length} done</span></div>
-        <div className="grid lg:grid-cols-2 gap-x-6 gap-y-0.5">{byT[t].map(x=><Row key={x} t={t} x={x} s={s} tg={tg}/>)}</div>
+        <div className="grid lg:grid-cols-2 gap-x-6 gap-y-0.5">{byT[t].map(x=><Row key={x} t={t} x={x} s={s} tg={tg} fin={ls.done}/>)}</div>
       </div>)}
     </div>}
-  if(view==='collector')return <div className="grid gap-3">{header}<CollectorSection s={s} tg={tg}/></div>;
+  if(view==='collector')return <div className="grid gap-3">{header}<CollectorSection s={s} tg={tg} set={set}/></div>;
   if(view==='avail'){
     const byT={};shownAvail.forEach(([t,x])=>(byT[t]=byT[t]||[]).push(x));
     return <div className="grid gap-3">
@@ -135,7 +138,7 @@ export default function TradersTab({open,setOpen,s,set,tg,sel,setSel,hide,setHid
       {shownAvail.length===0&&<Empty icon="empty" title="Nothing available here" hint="Try another map or raise your loyalty levels."/>}
       {names.filter(t=>byT[t]).map(t=>{const lim=exp[t]?byT[t].length:8;return <div key={t} className="rounded-xl border border-zinc-800 bg-zinc-900 p-3">
         <div className="flex items-center justify-between mb-1"><button onClick={()=>{setSel(t);setView('trader')}} title="Open this trader" className="font-semibold hover:text-amber-400">{t}</button><span className="text-xs text-zinc-400">{byT[t].length} available</span></div>
-        <div className="grid lg:grid-cols-2 gap-x-6 gap-y-0.5">{byT[t].slice(0,lim).map(x=><Row key={x} t={t} x={x} s={s} tg={tg}/>)}</div>
+        <div className="grid lg:grid-cols-2 gap-x-6 gap-y-0.5">{byT[t].slice(0,lim).map(x=><Row key={x} t={t} x={x} s={s} tg={tg} fin={ls.done}/>)}</div>
         {byT[t].length>8&&<button onClick={()=>setExp(o=>({...o,[t]:!o[t]}))} className="lnk mt-1 ml-2 text-xs">{exp[t]?'Show fewer':`Show all ${byT[t].length}`}</button>}
       </div>})}
     </div>}
@@ -143,7 +146,7 @@ export default function TradersTab({open,setOpen,s,set,tg,sel,setSel,hide,setHid
     {header}
 
     <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-8 gap-2 dim-led">{names.map(t=>{const tl=TRADER_TASKS[t],td=tl.filter(x=>done(t,x)).length,on=t===cur;
-      return <Pop key={t} done={tl.length>0&&td===tl.length} className="rounded-xl"><button onClick={()=>setSel(t)} className={'rounded-xl border px-3 py-2 text-left w-full max-sm:px-2 transition '+(on?'border-amber-500 bg-amber-500/10':'border-zinc-800 bg-zinc-900 hover:border-zinc-600')}>
+      return <Pop key={t} done={tl.length>0&&td===tl.length} className="rounded-xl"><button onClick={()=>setSel(t)} className={'rounded-xl border px-3 py-2 text-left w-full max-sm:px-2 transition '+(on?'border-amber-500 bg-amber-500/[0.04]':'border-zinc-800 bg-zinc-900 hover:border-zinc-600')}>
         <div className={'text-sm font-bold flex items-center justify-between gap-2 '+(on?'text-amber-500':'')}>{t}<Led st={ledOf(td,tl.length)}/></div>
         <div className="text-xs text-zinc-400 mb-1">{td}/{tl.length}</div>
         <Thin p={pc(td,tl.length)} tone={td===tl.length?'bg-green-500':'bg-amber-500'}/>
@@ -183,7 +186,7 @@ export default function TradersTab({open,setOpen,s,set,tg,sel,setSel,hide,setHid
             if(hide&&on)return null;
             return <div key={i.x} className="relative pl-6">
               <span className={'absolute -left-[11px] top-2.5 grid place-items-center size-[22px] rounded-full text-xs font-bold border '+(on?'bg-green-500 text-green-950 border-green-400':nxt?'bg-zinc-900 text-green-300 border-green-400':'bg-zinc-900 text-zinc-400 border-zinc-600')}>{on?<CheckGlyph/>:k+1}</span>
-              <Row t={cur} x={i.x} s={s} tg={tg} next={nxt} note={i.par.length>0&&(i.par.length!==1||i.par[0]!==prev)?i.par.join(', '):null}/>
+              <Row t={cur} x={i.x} s={s} tg={tg} fin={ls.done} next={nxt} note={i.par.length>0&&(i.par.length!==1||i.par[0]!==prev)?i.par.join(', '):null}/>
             </div>})}</div>}
         </div></Pop>})}</div>
     </section>}
@@ -198,7 +201,7 @@ export default function TradersTab({open,setOpen,s,set,tg,sel,setSel,hide,setHid
             <div className="flex items-center gap-2"><span className={'rounded-md px-2 py-0.5 text-xs font-bold '+(unlocked?'bg-green-400/15 text-green-300 border border-green-400/30':'bg-zinc-800 text-zinc-300 border border-zinc-700')}>LL{g}</span><span className="text-sm font-semibold">Loyalty Level {g}</span>{unlocked&&<span className="text-xs text-green-400">unlocked</span>}</div>
             <span className="text-xs text-zinc-400">{gd}/{items.length}</span>
           </div>}
-          <div className="grid lg:grid-cols-2 gap-x-6 gap-y-0.5">{shown.map(x=><Row key={x} t={cur} x={x} s={s} tg={tg} grp={g}/>)}</div>
+          <div className="grid lg:grid-cols-2 gap-x-6 gap-y-0.5">{shown.map(x=><Row key={x} t={cur} x={x} s={s} tg={tg} fin={ls.done} grp={g}/>)}</div>
         </div>})}</div>
     </section>}
   </div>;

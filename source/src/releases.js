@@ -1,7 +1,23 @@
 // Release notes shown when you click the maker's mark. Newest first. Add a new entry at the top for each update
 // and bump VERSION to match. Numbering runs 1.01, 1.02, 1.03 and so on, so the next one after 1.21 is 1.22. An entry can have an optional name in t:.
-export const VERSION='1.22.1';
+export const VERSION='1.23';
 export const RELEASES=[
+  {v:'1.23',x:true,d:'23 Oct 2026',n:['The pink Failed in game message on the Planning tab, which lists tasks your logs say you failed, can now be closed. It stays closed until your logs report a different failed task.',
+    'Each task listed in the Failed in game message is now a link, so you can open its wiki page in one click.',
+    'Experimental entries in the Changelog now show in pink when they are closed.',
+    'Tasks your game logs say you finished now show the time you finished them, in Traders and Tasks and in the log import window. The times stay in this browser and are not part of backup codes.']},
+  {v:'1.23',d:'23 Oct 2026',n:['Backup & Restore is now Backup, Transfer & Restore, with a new Transfer tab: scan a QR code or open a link on another device to bring your progress across.',
+    'Backup, Transfer & Restore asks your browser to keep your progress safe and shows whether it agreed.',
+    'The Overview has a new collapsible Collector items list, like the New Beginning objectives, with a search box. The Collector row in Prestige readiness now shows how many items you have ticked.',
+    'Each Collector item can now have a short note, such as where it is or who has it. Notes show on the Overview, the Loot tab and Traders and Tasks, go into your backup codes, and the Collector search box finds them.',
+    'New Rewards window shows everything each prestige gives you, with the prestige you are working towards marked. Open it with the Rewards button on the prestige card, or from the setup page when you choose your prestige.',
+    'Task names in Prestige readiness now jump to their section on the Overview.',
+    'Unticking an objective or story step now also unticks everything after it, including the chapter.',
+    'Problems saving your progress in the browser are now shown, instead of failing quietly.',
+    'A second open tab now asks you to use only one tab at a time, so progress cannot be overwritten.',
+    'The Import Screenshot guide has one more step, with shorter instructions in each.',
+    'Small layout improvements for phones',
+    'Data checked and corrections made.']},
   {t:'Hotfix',v:'1.22.1',x:true,d:'16 Oct 2026',n:['Starting a new prestige now clears what your game logs said about the last one, and only log messages from after it started are read, so tasks from your last prestige are no longer offered again. A prestige you were already on counts from the day you update.',
     'Import game logs has a new Clear log history button, for starting fresh whenever you want.']},
   {v:'1.22',x:true,d:'16 Oct 2026',about:{title:'Introducing experimental features',body:['This is our first experimental feature update. These features are still in heavy development and may change a lot, or be removed, before they join the main site.',

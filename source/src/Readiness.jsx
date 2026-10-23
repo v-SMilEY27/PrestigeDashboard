@@ -2,7 +2,7 @@ import React from 'react';
 import {Card,Section,Chip,Thin,Chev,Done,CheckGlyph,NumTick,toggleNum} from './ui.jsx';
 import {slug,curLevel,maxLvl} from './hideout.js';
 import {nbList} from './nb.js';
-import {storyProgress} from './story.js';
+import {storyProgress,STORY} from './story.js';
 import {TRADERS,CQUESTS,COLLECTOR_ITEMS,cqKey} from './data.js';
 
 // Every requirement the planner tracks for this prestige, as pass or fail.
@@ -12,7 +12,7 @@ export const buildReadiness=(cy,s)=>{
   const add=(group,label,have,need,done,go,note,key,pri,inp)=>R.push({group,label,have,need,done,go,note,key,pri,inp});
   // groups follow the in-game unlock panel; pri is the order the planner suggests doing things
   add('Level and roubles','PMC level',lvl,cy.lvl,lvl>=cy.lvl,null,null,undefined,3,{k:'lvl'});
-  if(needCol)add('Tasks','Collector',s.c['t:Collector']?1:0,1,!!s.c['t:Collector'],null,'Tick it once the game shows it done','t:Collector',5);
+  if(needCol)add('Tasks','Collector',s.c['t:Collector']?1:0,1,!!s.c['t:Collector'],null,`${COLLECTOR_ITEMS.filter(i=>s.c['ci:'+i.n]).length}/${COLLECTOR_ITEMS.length} items ticked below. Tick it once the game shows it done`,'t:Collector',5);
   cy.tasks.filter(t=>t!=='Collector'&&t!=='New Beginning').forEach(t=>add('Tasks',t,s.c['t:'+t]?1:0,1,!!s.c['t:'+t],null,'Task','t:'+t,1));
   cy.story.forEach(t=>add('Tasks',t,s.c['s:'+t]?1:0,1,!!s.c['s:'+t],null,(()=>{const p=storyProgress(t,s);return p?`Story chapter · ${p.have}/${p.need} steps ticked below`:'Story chapter'})(),'s:'+t,1));
   if(cy.tasks.includes('New Beginning'))add('Tasks','New Beginning',s.c['t:New Beginning']?1:0,1,!!s.c['t:New Beginning'],null,(()=>{const o=nbList(cy,s);return o.length?`${o.filter(x=>x.done).length}/${o.length} objectives ticked below. Do this last`:'Do this last'})(),'t:New Beginning',6);
@@ -37,6 +37,16 @@ export const buildReadiness=(cy,s)=>{
   return {rows:R,order,blocker:unmet[0]||null,done:R.filter(r=>r.done).length,pct};
 };
 
+// Where on the Overview page a task row leads when its name is pressed (the circle still ticks it).
+const jumpId=r=>!r.key?null:r.key==='t:New Beginning'?'sec-nb':r.key==='t:Collector'?'sec-collector':r.key.startsWith('s:')&&STORY[r.label]?'sec-story-'+slug(r.label):null;
+export const jumpTo=id=>{
+  window.dispatchEvent(new CustomEvent('pd-jump',{detail:id}));
+  setTimeout(()=>{const el=document.getElementById(id);if(!el)return;
+    const d=el.querySelector(':scope > details');if(d)d.open=true;
+    let calm=false;try{calm=window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+    el.scrollIntoView({behavior:calm?'auto':'smooth',block:'start'});
+    el.classList.remove('jump-flash');void el.offsetWidth;el.classList.add('jump-flash');setTimeout(()=>el.classList.remove('jump-flash'),1400)},60)};
+
 export default function Readiness({cy,s,go,tg,set}){
   const {rows,order,blocker,done}=buildReadiness(cy,s);
   const ready=blocker===null;
@@ -51,16 +61,17 @@ export default function Readiness({cy,s,go,tg,set}){
     </Card>
     <div className="sm:columns-2 gap-3">{order.filter(g=>rows.some(r=>r.group===g)).map(g=>{const gr=rows.filter(r=>r.group===g),gd=gr.filter(r=>r.done).length;
       const all=gd===gr.length;
-      return <div key={g} className="break-inside-avoid mb-3"><Card c={'!p-3 '+(all?'border-green-400/25':'')}><details key={g+all} open={!all} className="group">
+      return <div key={g} id={g==='Collector steps'?'sec-collector-steps':undefined} className="break-inside-avoid mb-3 scroll-mt-24 rounded-xl"><Card c={'!p-3 '+(all?'border-green-400/25':'')}><details key={g+all} open={!all} className="group">
         <summary className="cursor-pointer list-none flex items-center justify-between gap-2"><span className="font-semibold flex items-center gap-2"><span className="text-zinc-500 text-xs transition-transform group-open:rotate-90"><Chev/></span>{all&&<Done/>}{g}</span><Chip tone={all?'ok':'mute'}>{gd}/{gr.length}</Chip></summary>
         <div className="grid gap-0.5 mt-1">{gr.map(r=>{const isB=blocker&&blocker.label===r.label&&blocker.group===r.group;
-          const Tag=r.key?'label':r.go&&!r.inp?'button':'div';
+          const jid=jumpId(r),Txt=jid?'button':'span';
+          const Tag=r.key&&!jid?'label':r.go&&!r.inp&&!r.key?'button':'div';
           const props=r.key||r.inp?{}:r.go?{onClick:()=>go(...r.go)}:{};
           return <Tag key={r.label} {...props} className={'text-left flex items-center gap-2 rounded-lg px-2 py-1.5 '+(r.key||r.go?'cursor-pointer hover:bg-white/5 ':'')+(isB?'ring-1 ring-amber-500/60 bg-amber-500/5':'')}>
-            {r.key?<input type="checkbox" checked={r.done} onChange={()=>tg(r.key)} className="accent-amber-500 mt-0.5 size-4 shrink-0" aria-label={r.label}/>
+            {r.key?(jid?<label className="cbx"><input type="checkbox" checked={r.done} onChange={()=>tg(r.key)} className="accent-amber-500 mt-0.5 size-4 shrink-0" aria-label={r.label}/></label>:<input type="checkbox" checked={r.done} onChange={()=>tg(r.key)} className="accent-amber-500 mt-0.5 size-4 shrink-0" aria-label={r.label}/>)
               :r.inp?<NumTick className="mt-0.5" done={r.done} canClear={s.n['prev:'+r.inp.k]!==undefined} onClick={()=>toggleNum(s,set,r.inp.k,r.need,r.inp.val??s.n[r.inp.k]??0)} label={(r.done?'Clear: ':'Mark reached: ')+r.label}/>
               :<span className={'mt-0.5 grid place-items-center size-4 shrink-0 rounded-full text-xs font-bold '+(r.done?'bg-green-500 text-green-950':'border border-zinc-600 text-transparent')} aria-label={r.done?'met':'not met'}><CheckGlyph/></span>}
-            <span className="min-w-0 flex-1"><span className={'text-sm '+(r.done?'text-zinc-400':'font-medium')}>{r.label}</span>{!r.inp&&r.need>1&&<span className="text-xs text-zinc-500 ml-2">{r.have}/{r.need}</span>}
-              {isB&&<span className="ml-2"><Chip tone="warn">next</Chip></span>}{r.note&&!r.done&&<span className="block text-xs text-zinc-500">{r.note}</span>}</span>{r.inp&&<span className="flex items-center gap-2 shrink-0"><input type="number" min="0" max={r.inp.max} step={r.inp.step||1} value={r.inp.val??s.n[r.inp.k]??''} onChange={e=>{const v=e.target.value===''?undefined:+e.target.value;set(r.inp.k,v!==undefined&&r.inp.max!==undefined?Math.max(0,Math.min(r.inp.max,v)):v)}} aria-label={r.group==='Hideout upgrades'?r.label+' level built':r.label} placeholder="0" className="bg-zinc-800 w-20 px-2 py-0.5 rounded text-sm text-zinc-100"/><span className="text-xs text-zinc-500">/ {r.need}{r.group==='Hideout upgrades'?' built':''}</span><span className="w-14 shrink-0"><Thin p={r.frac*100} tone={r.done?'bg-green-500':'bg-amber-500'}/></span></span>}</Tag>})}</div></details></Card></div>})}</div>
+            <Txt {...(jid?{type:'button',onClick:()=>jumpTo(jid),title:'Jump to '+r.label+' below'}:{})} className={'min-w-0 flex-1 '+(jid?'text-left cursor-pointer':'')}><span className={'text-sm '+(r.done?'text-zinc-400':'font-medium')}>{r.label}</span>{!r.inp&&r.need>1&&<span className="text-xs text-zinc-500 ml-2">{r.have}/{r.need}</span>}
+              {isB&&<span className="ml-2"><Chip tone="warn">next</Chip></span>}{r.note&&!r.done&&<span className="block text-xs text-zinc-500">{r.note}</span>}</Txt>{r.inp&&<span className="flex items-center gap-2 shrink-0"><input type="number" min="0" max={r.inp.max} step={r.inp.step||1} value={r.inp.val??s.n[r.inp.k]??''} onChange={e=>{const v=e.target.value===''?undefined:+e.target.value;set(r.inp.k,v!==undefined&&r.inp.max!==undefined?Math.max(0,Math.min(r.inp.max,v)):v)}} aria-label={r.group==='Hideout upgrades'?r.label+' level built':r.label} placeholder="0" className="bg-zinc-800 w-20 px-2 py-0.5 rounded text-sm text-zinc-100"/><span className="text-xs text-zinc-500">/ {r.need}{r.group==='Hideout upgrades'?' built':''}</span><span className="w-14 shrink-0"><Thin p={r.frac*100} tone={r.done?'bg-green-500':'bg-amber-500'}/></span></span>}</Tag>})}</div></details></Card></div>})}</div>
   </Section>;
 }

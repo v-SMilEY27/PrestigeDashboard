@@ -3,7 +3,7 @@ import {Chip,Chev,Modal,ModalFoot,CloseBtn,HowTo,ExpNote,Bk} from './ui.jsx';
 import {autoSnap} from './Backup.jsx';
 import {readLogs,droppedLogs,fromInput,canWatch,savedHandle,forgetHandle,chooseHandle,openHandle} from './logs.js';
 import {useLS} from './useLS.js';
-import {saveLogState,resetLogHistory} from './LogStatus.jsx';
+import {saveLogState,fmtAt,resetLogHistory} from './LogStatus.jsx';
 import {prereqsOf} from './chain.js';
 
 const nice=k=>{const [t,...x]=k.split('|');return {t,x:x.join('|')}};
@@ -90,8 +90,8 @@ export default function ImportLogs({open,onClose,s,setS}){
             {brave?<>
               <div><b className="text-zinc-100">You are using Brave.</b> Brave switches this feature off by default. To turn it on:</div>
               <ol className="list-decimal pl-5 grid gap-1"><li>Open a new tab and type <b className="text-zinc-100 select-all">brave://flags/#file-system-access-api</b> in the address bar.</li><li>Set <b className="text-zinc-100">File System Access API</b> to <b className="text-zinc-100">Enabled</b>.</li><li>Press <b className="text-zinc-100">Relaunch</b>, then open this window again.</li></ol></>
-            :firefox?<div><b className="text-zinc-100">Firefox</b> does not support this, and there is no setting to change. For one-click checking, open the dashboard in Chrome, Edge, Brave, Opera or Vivaldi. Your progress carries over with <Bk>Backup &amp; Restore</Bk>.</div>
-            :safari?<div><b className="text-zinc-100">Safari</b> does not support this, and there is no setting to change. For one-click checking, open the dashboard in Chrome, Edge, Brave, Opera or Vivaldi. Your progress carries over with <Bk>Backup &amp; Restore</Bk>.</div>
+            :firefox?<div><b className="text-zinc-100">Firefox</b> does not support this, and there is no setting to change. For one-click checking, open the dashboard in Chrome, Edge, Brave, Opera or Vivaldi. Your progress carries over with <Bk>Backup, Transfer &amp; Restore</Bk>.</div>
+            :safari?<div><b className="text-zinc-100">Safari</b> does not support this, and there is no setting to change. For one-click checking, open the dashboard in Chrome, Edge, Brave, Opera or Vivaldi. Your progress carries over with <Bk>Backup, Transfer &amp; Restore</Bk>.</div>
             :<div>Use an up-to-date <b className="text-zinc-100">Chrome</b>, <b className="text-zinc-100">Edge</b>, <b className="text-zinc-100">Brave</b>, <b className="text-zinc-100">Opera</b> or <b className="text-zinc-100">Vivaldi</b>. If you already do, your browser version may be too old, or the feature may be switched off in its settings.</div>}
           </div></details></div>}
       {busy&&<div role="status" className="text-xs text-zinc-400">Reading logs…</div>}
@@ -110,7 +110,7 @@ export default function ImportLogs({open,onClose,s,setS}){
         {Object.entries(byT).map(([t,list])=><div key={t} className="rounded-lg border border-zinc-800 p-2 grid gap-0.5"><div className="text-sm font-semibold text-zinc-100">{t}</div>
           {list.map(x=>{const k='tk:'+t+':'+x,had=!!s.c[k];return <label key={k} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-white/5">
             <input type="checkbox" disabled={had} checked={!!pick[k]} onChange={e=>setPick(p=>({...p,[k]:e.target.checked}))} className="accent-pink-500 size-4"/>
-            <span className="flex-1">{x}</span><Chip tone={had?'mute':'ok'}>{had?'already ticked':(last&&last.to&&(res.doneAt[t+'|'+x]||0)>last.to?'new':'completed')}</Chip></label>})}</div>)}
+            <span className="flex-1">{x}</span>{res.doneAt[t+'|'+x]>0&&<span className="text-xs text-zinc-400 whitespace-nowrap">{fmtAt(res.doneAt[t+'|'+x])}</span>}<Chip tone={had?'mute':'ok'}>{had?'already ticked':(last&&last.to&&(res.doneAt[t+'|'+x]||0)>last.to?'new':'completed')}</Chip></label>})}</div>)}
         {extra.size>0&&<div className="text-xs text-zinc-400">Ticking these also ticks {extra.size} earlier task{extra.size===1?'':'s'} that lead to them, the same as ticking them by hand.</div>}
       </section>:<div className="text-sm text-zinc-300">No completed tasks were found in these logs.</div>}
       {(res.open.length>0||res.failed.length>0||res.unknown>0)&&<details className="text-xs text-zinc-400 group"><summary className="cursor-pointer list-none flex items-center gap-1.5"><span className="inline-block transition-transform group-open:rotate-90"><Chev/></span>Also in the logs, not ticked</summary>

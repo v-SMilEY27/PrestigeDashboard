@@ -15,8 +15,10 @@ import ImportShots from './ImportShots.jsx';
 import Experiments from './Experiments.jsx';
 import {useExp} from './expOptIn.js';
 import NewBeginning from './NewBeginning.jsx';
+import CollectorTracker from './CollectorTracker.jsx';
 import {prereqsOf,dependantsOf} from './chain.js';
 import {requiredSteps,sKey} from './story.js';
+import {nbList} from './nb.js';
 import StoryChapters from './StoryChapters.jsx';
 import {useLS} from './useLS.js';
 import Mark from './Mark.jsx';
@@ -33,7 +35,7 @@ const GhostBtn=p=><button {...p} className="rounded-lg border border-zinc-600 px
 
 const Title=({right,noGen,after})=>{const ex=useExp();return <header className="mb-4 relative pr-28 max-sm:pr-0">
   <Mark/>
-  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 max-sm:gap-x-1.5 max-sm:pb-5"><div className="max-sm:basis-full max-sm:pr-28"><h1 className="text-2xl font-bold text-amber-500">Prestige Dashboard</h1><p className="text-[10px] leading-3 text-zinc-500"><span className={'font-semibold '+(ex?'text-pink-400':'text-zinc-600')}>Version {VERSION}{ex?'E':''}</span> · <span className="text-[#7e7e87]">Data checked on 16 Oct 2026</span></p></div>{right}<Backup noGen={noGen}/>{after}<WelcomeBtn/></div>
+  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pb-3 max-sm:gap-x-1.5 max-sm:pb-5"><div className="max-sm:basis-full max-sm:pr-28"><h1 className="text-2xl font-bold text-amber-500">Prestige Dashboard</h1><p className="text-[10px] leading-3 text-zinc-500"><span className={'font-semibold '+(ex?'text-pink-400':'text-zinc-600')}>Version {VERSION}{ex?'E':''}</span> · <span className="text-[#7e7e87]">Data checked on 23 Oct 2026</span></p></div>{right}<Backup noGen={noGen}/>{after}<WelcomeBtn/></div>
 </header>};
 
 // The first time a prestige's setup is finished, that moment is when it started: game logs from before it belong to the last prestige (hotfix 1.22.1).
@@ -44,7 +46,9 @@ const startLogs=o=>{if(isNewStart(o))resetLogHistory()};
 function Cycle({cy,choose}){
 const [s,setS]=useLS('tpp2_cycle_'+cy.p,{n:{},c:{}});const setupNew=useSetupNew();const [picking,setPicking]=React.useState(false);
 const navRef=React.useRef(null);
-const set=(k,v)=>setS(o=>({...o,n:{...o.n,[k]:v}}));const tg=k=>setS(o=>{const on=!o.c[k],c={...o.c,[k]:on};if(k.startsWith('tk:'))(on?prereqsOf(k):dependantsOf(k)).forEach(p=>{c[p]=on});if(on&&k.startsWith('s:'))requiredSteps(k.slice(2),o).forEach(x=>{c[sKey(x.id)]=true});return {...o,c}});
+// New Beginning objectives run in order: undoing one also undoes every objective after it (a counted objective counts as undone once it drops below its target).
+const nbUndoAfter=(o,c,n,i,list)=>{list.slice(i+1).forEach(x=>{c[x.key]=false;n[x.nkey]=0})};
+const set=(k,v)=>setS(o=>{const n={...o.n,[k]:v};if(k.startsWith('cn:')&&!v)delete n[k];let c=o.c;if(k.startsWith('nbn:')&&cy.tasks.includes('New Beginning')){const list=nbList(cy,o),i=list.findIndex(x=>x.nkey===k);if(i>=0&&list[i].done&&v<list[i].need){c={...c};nbUndoAfter(o,c,n,i,list)}}return {...o,n,c}});const tg=k=>setS(o=>{const on=!o.c[k],c={...o.c,[k]:on};let n=o.n;if(!on&&k.startsWith('nb:')&&cy.tasks.includes('New Beginning')){const list=nbList(cy,o),i=list.findIndex(x=>x.key===k);if(i>=0){n={...o.n};nbUndoAfter(o,c,n,i,list)}}if(k.startsWith('tk:'))(on?prereqsOf(k):dependantsOf(k)).forEach(p=>{c[p]=on});if(on&&k.startsWith('s:'))requiredSteps(k.slice(2),o).forEach(x=>{c[sKey(x.id)]=true});return {...o,n,c}});
 React.useEffect(()=>{const h=()=>setS(o=>{if(!o.n.skipIgnore)return o;const n={...o.n};delete n.skipIgnore;return {...o,n}});window.addEventListener('pd-restore-warnings',h);return()=>window.removeEventListener('pd-restore-warnings',h)},[]);
 // Older versions ticked Collector gate quests under their own keys. Move those ticks onto the trader task they are.
 const mig=React.useRef(false);
@@ -93,7 +97,8 @@ return <div className={'acc acc-p'+cy.p+' grid gap-4'}>
   <PageLine>What {playName(cy.p)} needs, and how far along you are. Type values straight into the checklist and tick tasks as you finish them.</PageLine>
   <Readiness cy={cy} s={s} go={go} tg={tg} set={set}/>
   {cy.tasks.includes('New Beginning')&&<NewBeginning cy={cy} s={s} set={set} tg={tg}/>}
-  <StoryChapters cy={cy} s={s} tg={tg} set={set} tickMany={ks=>setS(o=>({...o,c:{...o.c,...Object.fromEntries(ks.map(k=>[k,true]))}}))}/>
+  {cy.tasks.includes('Collector')&&<CollectorTracker s={s} tg={tg} set={set}/>}
+  <StoryChapters cy={cy} s={s} tg={tg} set={set} tickMany={ks=>setS(o=>({...o,c:{...o.c,...Object.fromEntries(ks.map(k=>[k,true]))}}))} untickMany={ks=>setS(o=>({...o,c:{...o.c,...Object.fromEntries(ks.map(k=>[k,false]))}}))}/>
 </div>}
 
 {tab==='Hideout'&&<HideoutTab cy={cy} s={s} set={set} sec={hsec} setSec={setHsec} open={hopen} setOpen={setHopen}/>}
